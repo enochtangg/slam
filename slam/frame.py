@@ -12,14 +12,12 @@ class Frame():
         self.good_features_to_track()
 
     def good_features_to_track(self):
-        kps = []
+        orb = cv2.ORB_create()
         gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
-        corners = cv2.goodFeaturesToTrack(image=gray, maxCorners=2000, qualityLevel=0.05, minDistance=4)
-        for corner in corners:
-            x, y = corner.ravel()
-            kp = cv2.KeyPoint(x=x, y=y, _size=0.5)
-            kps.append(kp)
-        print(kps)
+        pts = cv2.goodFeaturesToTrack(image=gray, maxCorners=2000, qualityLevel=0.05, minDistance=4)
+        
+        kps = [cv2.KeyPoint(x=pt[0][0], y=pt[0][1], _size=5) for pt in pts]
+        kps, des = orb.compute(self.frame, kps)
         self.kp_frame = cv2.drawKeypoints(self.frame, kps, None, color=(0,255,0), flags=0)
 
     def show(self):
