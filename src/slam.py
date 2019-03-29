@@ -1,13 +1,12 @@
-from matplotlib import pyplot
 from frame import process_frame
 
-import numpy 
 import cv2
+
 
 if __name__ == '__main__':
     cap = cv2.VideoCapture('../videos/test.mp4')
 
-    while(cap.isOpened()):
+    while cap.isOpened():
         ret, frame = cap.read()
 
         if ret is True:
