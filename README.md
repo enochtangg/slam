@@ -1,8 +1,9 @@
 # slam
 
 ## TODO:
-* Look into pygame, openGL, and other 3d libraries
-* Refactor code for usage
+* look into what does matching frames do (BFMatcher, KnnMatch)
+* implement match_frames
+* use triangulate to get points in 3 dimensional space
 
 ## DONE:
 * seup python package environment

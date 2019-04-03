@@ -7,8 +7,8 @@ class Display:
         self.H = 1080//2
 
     @staticmethod
-    def process_kps_to_frame(img, kps):
-        img2 = cv2.drawKeypoints(img, kps, None, color=(0, 255, 0), flags=0)
+    def process_kps_to_frame(img, kps_frame):
+        img2 = cv2.drawKeypoints(img, kps_frame, None, color=(0, 255, 0), flags=0)
         return img2
 
     @staticmethod
