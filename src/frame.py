@@ -1,11 +1,15 @@
 from extractor import FeatureExtractor
 from display import Display
+from helpers import EssentialMatrixTransform
 
 import cv2
 import numpy as np
 
+from skimage.measure import ransac
+from skimage.transform import AffineTransform
 
-# IRt = np.eye(4)
+
+IRt = np.eye(4)
 
 
 # Frame is a wrapper class used by main script to call extractor and display.
@@ -23,7 +27,8 @@ class Frame:
             self.kpus, self.des = self.feature_extractor.extract(img)
             self.pts = [None]*len(self.kpus)
 
-    def match_frames(self, f1, f2):
+    @staticmethod
+    def match_frames(f1, f2):
         # Matching previous frame and current frame (used in triangulation
         bf = cv2.BFMatcher(cv2.NORM_HAMMING)
 
@@ -36,7 +41,7 @@ class Frame:
         idx_of_des_from_f1, idx_of_des_from_f2 = [], []
         idx_set1, idx_set2 = set(), set()
 
-        # using Lowe's ratio to filter out bad kps
+        # using Lowe's ratio to filter out bad matches
         for m, n in matches:
             if m.distance < 0.75 * n.distance:
                 p1 = f1.kpus[m.queryIdx]
@@ -52,13 +57,18 @@ class Frame:
 
                         good_matches.append((p1, p2))
 
-        print(good_matches)
+        good_matches = np.array(good_matches)
+        idx_of_des_from_f1 = np.array(idx_of_des_from_f1)
+        idx_of_des_from_f2 = np.array(idx_of_des_from_f2)
 
-        # now we are left with good matches
-        # we want see all the points are are inliers with ransac
-        # then return the index_ofde
+        # fit matrix
+        model, inliers = ransac((good_matches[:, 0], good_matches[:, 1]),
+                                EssentialMatrixTransform,
+                                min_samples=8,
+                                residual_threshold=0.02,
+                                max_trials=100)
 
-        return matches
+        return idx_of_des_from_f1[inliers], idx_of_des_from_f2[inliers], fundamentalToRt(model.params)
 
     def process_frame(self, img):
         img = cv2.resize(img, (self.display.W, self.display.H))
@@ -70,7 +80,7 @@ class Frame:
             return
 
         # implement some matching frame function that takes the last two frames from self.frames
-        pts, Rt = self.match_frames(self.frames[-1], self.frames[-2])
+        idx1, idx2, Rt = self.match_frames(self.frames[-1], self.frames[-2])
         # cv2.triangulatePoints(IRt, Rt, pts[:,0].T, pts[:,1].T).T
 
         # for 2D display
