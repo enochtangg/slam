@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 
 # from https://github.com/scikit-image/scikit-image/blob/master/skimage/transform/_geometric.py
@@ -47,3 +48,33 @@ class EssentialMatrixTransform(object):
 
         return np.abs(dst_F_src) / np.sqrt(F_src[0] ** 2 + F_src[1] ** 2
                                            + Ft_dst[0] ** 2 + Ft_dst[1] ** 2)
+
+# copied
+def poseRt(R, t):
+    ret = np.eye(4)
+    ret[:3, :3] = R
+    ret[:3, 3] = t
+    return ret
+
+# copied
+def fundamentalToRt(F):
+    W = np.mat([[0, -1, 0], [1, 0, 0], [0, 0, 1]], dtype=float)
+    U, d, Vt = np.linalg.svd(F)
+    if np.linalg.det(U) < 0:
+        U *= -1.0
+    if np.linalg.det(Vt) < 0:
+        Vt *= -1.0
+    R = np.dot(np.dot(U, W), Vt)
+    if np.sum(R.diagonal()) < 0:
+        R = np.dot(np.dot(U, W.T), Vt)
+    t = U[:, 2]
+
+    # TODO: Resolve ambiguities in better ways. This is wrong.
+    if t[2] < 0:
+        t *= -1
+
+    # TODO: UGLY!
+    if os.getenv("REVERSE") is not None:
+        t *= -1
+    return np.linalg.inv(poseRt(R, t))
+

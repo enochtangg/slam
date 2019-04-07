@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 
 class Display:
@@ -8,7 +9,7 @@ class Display:
 
     @staticmethod
     def process_kps_to_frame(img, kps_frame):
-        img2 = cv2.drawKeypoints(img, kps_frame, None, color=(0, 255, 0), flags=0)
+        img2 = cv2.drawKeypoints(img, kps_frame, np.array([]), color=(255, 0, 0), flags=0)
         return img2
 
     @staticmethod

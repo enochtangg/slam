@@ -1,13 +1,11 @@
 from extractor import FeatureExtractor
 from display import Display
-from helpers import EssentialMatrixTransform
+from helpers import EssentialMatrixTransform, fundamentalToRt
 
 import cv2
 import numpy as np
 
-from skimage.measure import ransac
-from skimage.transform import AffineTransform
-
+from skimage.measure import ransac, LineModelND
 
 IRt = np.eye(4)
 
@@ -61,12 +59,12 @@ class Frame:
         idx_of_des_from_f1 = np.array(idx_of_des_from_f1)
         idx_of_des_from_f2 = np.array(idx_of_des_from_f2)
 
+
         # fit matrix
-        model, inliers = ransac((good_matches[:, 0], good_matches[:, 1]),
-                                EssentialMatrixTransform,
-                                min_samples=8,
-                                residual_threshold=0.02,
-                                max_trials=100)
+        model, inliers = ransac((good_matches[:, 0], good_matches[:, 1]), EssentialMatrixTransform, min_samples=8,
+                                residual_threshold=0.02, max_trials=100)
+
+        print(model)
 
         return idx_of_des_from_f1[inliers], idx_of_des_from_f2[inliers], fundamentalToRt(model.params)
 

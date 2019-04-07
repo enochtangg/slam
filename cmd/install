@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 
 source venv/bin/activate
-cd src;
-python3 slam.py;
+pip3 install -r requirements.txt

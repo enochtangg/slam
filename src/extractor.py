@@ -14,6 +14,6 @@ class FeatureExtractor:
         # Extraction
         kps = [cv2.KeyPoint(x=pt[0][0], y=pt[0][1], _size=20) for pt in pts]
         kps, des = self.orbs.compute(img, kps)
-        print(kps)
+        # print(kps)
 
         return kps, des
