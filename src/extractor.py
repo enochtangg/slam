@@ -1,4 +1,4 @@
-import numpy 
+import numpy as np
 import cv2
 
 
@@ -8,7 +8,7 @@ class FeatureExtractor:
 
     def extract(self, img):
         # Detection
-        pts = cv2.goodFeaturesToTrack(image=numpy.mean(img, axis=2).astype(numpy.uint8), maxCorners=2500,
+        pts = cv2.goodFeaturesToTrack(image=np.mean(img, axis=2).astype(np.uint8), maxCorners=2500,
                                       qualityLevel=0.01, minDistance=3)
         
         # Extraction
@@ -16,4 +16,4 @@ class FeatureExtractor:
         kps, des = self.orbs.compute(img, kps)
         # print(kps)
 
-        return kps, des
+        return np.array(kps), np.array(des)

@@ -7,10 +7,9 @@ import numpy as np
 
 from skimage.measure import ransac, LineModelND
 
-IRt = np.eye(4)
+IRt = np.zeros((3,4))
+IRt[:, :3] = np.eye(3)
 
-
-# Frame is a wrapper class used by main script to call extractor and display.
 class Frame:
     def __init__(self, img):
         self.feature_extractor = FeatureExtractor()
@@ -60,13 +59,14 @@ class Frame:
         idx_of_des_from_f2 = np.array(idx_of_des_from_f2)
 
 
-        # fit matrix
-        model, inliers = ransac((good_matches[:, 0], good_matches[:, 1]), EssentialMatrixTransform, min_samples=8,
-                                residual_threshold=0.02, max_trials=100)
+        # # fit matrix
+        # model, inliers = ransac((good_matches[:, 0], good_matches[:, 1]), EssentialMatrixTransform, min_samples=8,
+        #                         residual_threshold=0.02, max_trials=100)
+        #
+        # print(model)
 
-        print(model)
-
-        return idx_of_des_from_f1[inliers], idx_of_des_from_f2[inliers], fundamentalToRt(model.params)
+        # return idx_of_des_from_f1[inliers], idx_of_des_from_f2[inliers], fundamentalToRt(model.params)
+        return good_matches, idx_of_des_from_f1, idx_of_des_from_f2
 
     def process_frame(self, img):
         img = cv2.resize(img, (self.display.W, self.display.H))
@@ -77,9 +77,18 @@ class Frame:
         if len(self.frames) <= 1:
             return
 
+        f1 = self.frames[-1]
+        f2 = self.frames[-2]
+
         # implement some matching frame function that takes the last two frames from self.frames
-        idx1, idx2, Rt = self.match_frames(self.frames[-1], self.frames[-2])
-        # cv2.triangulatePoints(IRt, Rt, pts[:,0].T, pts[:,1].T).T
+        good_matches, idx1, idx2 = self.match_frames(f1, f2)
+
+        # figure out projection points (must be 2xN)
+        # figure out second projection matrix
+        print(good_matches.shape)
+        print(good_matches[:, 0].shape)
+        # points_in_3d = cv2.triangulatePoints(IRt, IRt, good_matches[:, 0].T, good_matches[:, 1].T)
+        # print(points_in_3d)
 
         # for 2D display
         kps_frame = self.display.process_kps_to_frame(img, frame.kpus)
