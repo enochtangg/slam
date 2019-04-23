@@ -83,12 +83,15 @@ class Frame:
         # implement some matching frame function that takes the last two frames from self.frames
         good_matches, idx1, idx2 = self.match_frames(f1, f2)
 
-        # figure out projection points (must be 2xN)
-        # figure out second projection matrix
-        print(good_matches.shape)
-        print(good_matches[:, 0].shape)
-        # points_in_3d = cv2.triangulatePoints(IRt, IRt, good_matches[:, 0].T, good_matches[:, 1].T)
-        # print(points_in_3d)
+        proj_points_1 = np.array([np.array([kp.pt[0] for kp in good_matches[:, 0]]),
+                                  np.array([kp.pt[1] for kp in good_matches[:, 0]])])
+
+        proj_points_2 = np.array([np.array([kp.pt[0] for kp in good_matches[:, 1]]),
+                                  np.array([kp.pt[1] for kp in good_matches[:, 1]])])
+        
+        # figure out how to get camera matrix 2 (Rt)
+        points_in_3d = cv2.triangulatePoints(IRt, Rt, proj_points_1, proj_points_2)
+        print(points_in_3d)
 
         # for 2D display
         kps_frame = self.display.process_kps_to_frame(img, frame.kpus)
